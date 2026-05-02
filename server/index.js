@@ -13,12 +13,34 @@ app.get("/", (req, res) => {
   res.send("✅ Wirtschaftsspiel-Server läuft");
 });
 
-// ✅ Socket.IO bereit
+const players = {};
+
 io.on("connection", socket => {
   console.log("Spieler verbunden:", socket.id);
-});
 
-const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => {
-  console.log("Server läuft auf Port", PORT);
+  socket.on("join", ({ name }) => {
+    players[socket.id] = { name, cash: 1000 };
+    console.log(name, "ist beigetreten");
+
+    io.emit("update", players);
+  });
+
+  socket.on("decision", ({ price, amount }) => {
+    const p = players[socket.id];
+    if (!p) return;
+
+    // MINIMAL-Logik: einfache Veränderung
+    const delta = Math.round((price - 10) * amount);
+    p.cash += delta;
+
+    console.log(p.name, "hat entschieden:", price, amount, "=>", p.cash);
+
+    // ALLE Clients informieren
+    io.emit("update", players);
+  });
+
+  socket.on("disconnect", () => {
+    delete players[socket.id];
+    io.emit("update", players);
+  });
 });
