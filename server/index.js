@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 const initialPlayer = (id, name) => ({ id, name, price: 10, production: 20, rnd: 0, loan: 0, cash: 1000, lastProfit: 0 });export default function Wirtschaftsspiel() { const [me, setMe] = useState(null); const [players, setPlayers] = useState({}); const [round, setRound] = useState(1); const [economy, setEconomy] = useState({ demandFactor: 1 }); const [isTeacher, setIsTeacher] = useState(false);
 // Empfang von Updates useEffect(() => { channel.onmessage = (e) => { const msg = e.data; if (msg.type === "STATE") { setPlayers(msg.players); setRound(msg.round); setEconomy(msg.economy); } }; }, []);
 // Login if (!me) { return ( 
-🏭 Wirtschaftsplanspiel
 <button className="bg-blue-600 text-white px-4 py-2 w-full mb-2" onClick={() => { const name = document.getElementById("name").value; const id = Math.random().toString(36).slice(2); setMe({ id, name }); channel.postMessage({ type: "JOIN", player: initialPlayer(id, name) }); }}>Beitreten <button className="text-sm underline" onClick={() => setIsTeacher(true)}>Als Lehrkraft
 ); }
 // === Spieler-Ansicht === if (!isTeacher) { const p = players[me.id] || initialPlayer(me.id, me.name); return ( 
